@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See commented blocks below for -->
+<!-- some examples of how to customize the build. -->
+<!-- (If you delete it and reopen the project it will be recreated.) -->
+<!-- By default, only the Clean and Build commands use this build script. -->
+<!-- Commands such as Run, Debug, and Test only use this build script if -->
+<!-- the Compile on Save feature is turned off for the project. -->
+<!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
+<!-- in the project's Project Properties dialog box.-->
+<project name="AntTask" default="Package" basedir=".">
+    <description>Builds, tests, and runs the project AntTask.</description>
+    <property name="tools.dir" value="Tools" />
+    <property name="project.dir" value="Project" />
+    <property name="build.dir" value="Build" />
+    <property name="tools.config" value="Tools/config" />
+    <property file="${tools.config}/svn.properties" />
+	<property file="${tools.config}/local.properties" />
+    <property name="taskProject.dir" value="Tools/AntTask" />
+	<property name="taskProject.jar" value="${taskProject.dir}/dist/AntTask.jar"/>
+	<property name="android.tools.dir" location="${sdk.dir}/tools" />
+	<condition property="exe" value=".exe" else=""><os family="windows" /></condition>
+	<condition property="bat" value=".bat" else=""><os family="windows" /></condition>
+	<property name="android" location="${android.tools.dir}/android${bat}" />
+	
+	<condition property="taskJar.exist">
+        <resourceexists>
+            <file file="${taskProject.jar}"/>
+        </resourceexists>
+    </condition>
+    <!--
+
+    There exist several targets which are by default empty and which can be 
+    used for execution of your tasks. These targets are usually executed 
+    before and after some main targets. They are: 
+
+      -pre-init:                 called before initialization of project properties
+      -post-init:                called after initialization of project properties
+      -pre-compile:              called before javac compilation
+      -post-compile:             called after javac compilation
+      -pre-compile-single:       called before javac compilation of single file
+      -post-compile-single:      called after javac compilation of single file
+      -pre-compile-test:         called before javac compilation of JUnit tests
+      -post-compile-test:        called after javac compilation of JUnit tests
+      -pre-compile-test-single:  called before javac compilation of single JUnit test
+      -post-compile-test-single: called after javac compilation of single JUunit test
+      -pre-jar:                  called before JAR building
+      -post-jar:                 called after JAR building
+      -post-clean:               called after cleaning build products
+
+    (Targets beginning with '-' are not intended to be called on their own.)
+
+    Example of inserting an obfuscator after compilation could look like this:
+
+        <target name="-post-compile">
+            <obfuscate>
+                <fileset dir="${build.classes.dir}"/>
+            </obfuscate>
+        </target>
+
+    For list of available properties check the imported 
+    nbproject/build-impl.xml file. 
+
+
+    Another way to customize the build is by overriding existing main targets.
+    The targets of interest are: 
+
+      -init-macrodef-javac:     defines macro for javac compilation
+      -init-macrodef-junit:     defines macro for junit execution
+      -init-macrodef-debug:     defines macro for class debugging
+      -init-macrodef-java:      defines macro for class execution
+      -do-jar-with-manifest:    JAR building (if you are using a manifest)
+      -do-jar-without-manifest: JAR building (if you are not using a manifest)
+      run:                      execution of project 
+      -javadoc-build:           Javadoc generation
+      test-report:              JUnit report generation
+
+    An example of overriding the target for project execution could look like this:
+
+        <target name="run" depends="AntTask-impl.jar">
+            <exec dir="bin" executable="launcher.exe">
+                <arg file="${dist.jar}"/>
+            </exec>
+        </target>
+
+    Notice that the overridden target depends on the jar target and not only on 
+    the compile target as the regular run target does. Again, for a list of available 
+    properties which you can use, check the target you are overriding in the
+    nbproject/build-impl.xml file. 
+
+    -->
+	    <!-- jar file from where the tasks are loaded -->
+    <path id="tools.antlibs">
+        <pathelement path="${taskProject.jar}" />
+    </path>
+    <target name="jarTask" unless="taskJar.exist">
+        <echo level="info">The Custom Task Jar package does not exist. Recompile...</echo>
+		<ant dir="${taskProject.dir}" target="jar" />
+    </target>
+    <target name="checkOut" depends="jarTask" description="Check out code from Svn">
+        <echo level="info">运行自定义的Task</echo>
+        <echo level="info">${taskProject.jar}</echo>
+        <!-- Custom tasks -->
+		<taskdef resource="anttasks.properties" classpathref="tools.antlibs" />
+        <SVN message= "zhangzhenli">zhangyajun</SVN>
+    </target>
+	<target name="-pre-compile" depends="checkOut, jarTask">
+        <Src path= "${project.dir}"/>
+    </target>
+	<target name="updateProjects" depends="-pre-compile,checkOut, jarTask" >
+        <UpdateProject path= "${build.dir}"/>
+    </target>
+	<target name="Package" depends ="updateProjects">
+		<ant dir="${build.dir}\YiTest" target="release" />
+	</target>
+<!-- 	<target name="updateProject" depends="checkOut, jarTask" >
+        <exec executable="${aapt}" taskName="crunch">
+            <arg value="crunch" />
+            <arg value="-v" />
+            <arg value="-S" />
+            <arg path="${resource.absolute.dir}" />
+            <arg value="-C" />
+            <arg path="${out.res.absolute.dir}" />
+        </exec>
+    </target> -->
+
+</project>

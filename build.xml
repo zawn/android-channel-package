@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="AntTask" default="package" basedir=".">
+    <description>Builds, tests, and runs the project AntTask.</description>
+    <property name="tools.dir" value="Tools" />
+    <property name="project.dir" value="Project" />
+    <property name="project.sourceProcess" value="false" />
+    <property name="build.dir" value="Build" />
+    <property name="tools.config" value="Tools/config" />
+    <property file="${tools.config}/svn.properties" />
+    <property file="${tools.config}/local.properties" />
+    <property name="ChannelIDs" value="${tools.config}/ChannelIDs.txt" />
+    <property name="taskProject.dir" value="Tools/AntTask" />
+    <property name="taskProject.jar" value="${taskProject.dir}/dist/AntTask.jar"/>
+    <property name="android.tools.dir" location="${sdk.dir}/tools" />
+    <condition property="exe" value=".exe" else="">
+        <os family="windows" />
+    </condition>
+    <condition property="bat" value=".bat" else="">
+        <os family="windows" />
+    </condition>
+    <property name="android" location="${android.tools.dir}/android${bat}" />
+	
+    <condition property="taskJar.exist">
+        <resourceexists>
+            <file file="${taskProject.jar}"/>
+        </resourceexists>
+    </condition>
+    <!--
+    (Targets beginning with '-' are not intended to be called on their own.)
+
+    Example of inserting an obfuscator after compilation could look like this:
+
+        <target name="-post-compile">
+            <obfuscate>
+                <fileset dir="${build.classes.dir}"/>
+            </obfuscate>
+        </target>
+
+    For list of available properties check the imported 
+    nbproject/build-impl.xml file. 
+
+
+    Another way to customize the build is by overriding existing main targets.
+    The targets of interest are: 
+
+      -init-macrodef-javac:     defines macro for javac compilation
+      -init-macrodef-junit:     defines macro for junit execution
+      -init-macrodef-debug:     defines macro for class debugging
+      -init-macrodef-java:      defines macro for class execution
+      -do-jar-with-manifest:    JAR building (if you are using a manifest)
+      -do-jar-without-manifest: JAR building (if you are not using a manifest)
+      run:                      execution of project 
+      -javadoc-build:           Javadoc generation
+      test-report:              JUnit report generation
+
+    An example of overriding the target for project execution could look like this:
+
+        <target name="run" depends="AntTask-impl.jar">
+            <exec dir="bin" executable="launcher.exe">
+                <arg file="${dist.jar}"/>
+            </exec>
+        </target>
+
+    Notice that the overridden target depends on the jar target and not only on 
+    the compile target as the regular run target does. Again, for a list of available 
+    properties which you can use, check the target you are overriding in the
+    nbproject/build-impl.xml file. 
+
+        -->
+        <!-- jar file from where the tasks are loaded -->
+        <path id="tools.antlibs">
+            <pathelement path="${taskProject.jar}" />
+        </path>
+        <target name="-pre-taskdef" unless="taskJar.exist">
+            <echo level="info">The Custom Task Jar package does not exist. Recompile...</echo>
+            <ant dir="${taskProject.dir}" target="jar" />
+        </target>
+        <target name="-taskdef" depends="-pre-taskdef">
+            <!-- Custom tasks -->
+            <taskdef resource="anttasks.properties" classpathref="tools.antlibs" />
+        </target>
+        <target name="pullCode" depends="-taskdef" description="从SVN上检出代码">
+            <!--        
+            <echo level="info">运行自定义的Task</echo>
+            <echo level="info">${taskProject.jar}</echo>
+            -->
+            <Svn message= "zhangzhenli">zhangyajun</Svn>
+        </target>
+        <target name="processCode" depends="pullCode,-taskdef" description="将代码复制到build.dir并处理代码">
+            <Src path= "${project.dir}"/>
+        </target>
+        <target name="update" depends="processCode, pullCode,-taskdef" >
+            <Update path= "${build.dir}"/>
+        </target>
+        <target name="package" depends ="update">
+            <Package path= "${build.dir}"/>
+        </target>
+        <!-- 	
+        <target name="updateProject" depends="checkOut, jarTask" >
+            <exec executable="${aapt}" taskName="crunch">
+                <arg value="crunch" />
+                <arg value="-v" />
+                <arg value="-S" />
+                <arg path="${resource.absolute.dir}" />
+                <arg value="-C" />
+                <arg path="${out.res.absolute.dir}" />
+            </exec>
+        </target> 
+        -->
+</project>
