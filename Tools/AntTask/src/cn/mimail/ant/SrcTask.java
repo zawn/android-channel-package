@@ -235,4 +235,24 @@ public class SrcTask extends Task {
     private File processLinkSrc(File f) {
         throw new UnsupportedOperationException("Not yet implemented");
     }
+
+    public static String getClassPath() {
+        String value = System.getProperties().getProperty("java.class.path");
+        String[] jar = value.split(";");
+        StringBuilder sb = new StringBuilder();
+        String sp = ";\n";
+        sb.append("\"");
+        sb.append(".;\n");
+        for (int i = 1; i < jar.length; i++) {
+            File file = new File(jar[i]);
+            try {
+                sb.append(file.getCanonicalPath()).append(sp);
+            } catch (IOException ex) {
+            }
+        }
+        sb.append("\"");
+        System.out.println("ClassPath: ");
+        System.out.println(sb.toString());
+        return sb.toString();
+    }
 }
