@@ -11,7 +11,7 @@
     <property name="ChannelIDs" value="${tools.config}/ChannelIDs.txt" />
     <property name="taskProject.dir" value="Tools/AntTask" />
     <property name="taskProject.jar" value="${taskProject.dir}/dist/AntTask.jar"/>
-    <property name="android.tools.dir" location="${sdk.dir}/tools" />
+    <property name="android.tools.dir" location="${sdk.dir}/tools" />	
     <condition property="exe" value=".exe" else="">
         <os family="windows" />
     </condition>
@@ -66,45 +66,56 @@
     properties which you can use, check the target you are overriding in the
     nbproject/build-impl.xml file. 
 
+    -->
+    <!-- jar file from where the tasks are loaded -->
+    <path id="tools.antlibs">
+        <pathelement path="${taskProject.jar}" />
+    </path>
+    <target name="-pre-taskdef" unless="taskJar.exist">
+        <echo level="info">The Custom Task Jar package does not exist. Recompile...</echo>
+        <ant dir="${taskProject.dir}" target="jar" />
+    </target>
+    <target name="-taskdef" depends="-pre-taskdef">
+        <!-- Custom tasks -->
+        <taskdef resource="anttasks.properties" classpathref="tools.antlibs" >
+            <classpath>
+                <path id="run.classpath">
+                    <fileset dir="${tools.dir}/lib">  
+                        <include name="*.jar" />  
+                    </fileset>
+                    <fileset dir="${tools.dir}/svnkit-1.7.6/lib">  
+                        <include name="*.jar" />  
+                    </fileset> 
+                </path>
+            </classpath>
+        </taskdef>
+    </target>
+    <target name="pullCode" depends="-taskdef" description="从SVN上检出代码">
+        <!--        
+        <echo level="info">运行自定义的Task</echo>
+        <echo level="info">${taskProject.jar}</echo>
         -->
-        <!-- jar file from where the tasks are loaded -->
-        <path id="tools.antlibs">
-            <pathelement path="${taskProject.jar}" />
-        </path>
-        <target name="-pre-taskdef" unless="taskJar.exist">
-            <echo level="info">The Custom Task Jar package does not exist. Recompile...</echo>
-            <ant dir="${taskProject.dir}" target="jar" />
-        </target>
-        <target name="-taskdef" depends="-pre-taskdef">
-            <!-- Custom tasks -->
-            <taskdef resource="anttasks.properties" classpathref="tools.antlibs" />
-        </target>
-        <target name="pullCode" depends="-taskdef" description="从SVN上检出代码">
-            <!--        
-            <echo level="info">运行自定义的Task</echo>
-            <echo level="info">${taskProject.jar}</echo>
-            -->
-            <Svn message= "zhangzhenli">zhangyajun</Svn>
-        </target>
-        <target name="processCode" depends="pullCode,-taskdef" description="将代码复制到build.dir并处理代码">
-            <Src path= "${project.dir}"/>
-        </target>
-        <target name="update" depends="processCode, pullCode,-taskdef" >
-            <Update path= "${build.dir}"/>
-        </target>
-        <target name="package" depends ="update">
-            <Package path= "${build.dir}"/>
-        </target>
-        <!-- 	
-        <target name="updateProject" depends="checkOut, jarTask" >
-            <exec executable="${aapt}" taskName="crunch">
-                <arg value="crunch" />
-                <arg value="-v" />
-                <arg value="-S" />
-                <arg path="${resource.absolute.dir}" />
-                <arg value="-C" />
-                <arg path="${out.res.absolute.dir}" />
-            </exec>
-        </target> 
-        -->
+        <Svn message= "zhangzhenli">zhangyajun</Svn>
+    </target>
+    <target name="processCode" depends="pullCode,-taskdef" description="将代码复制到build.dir并处理代码">
+        <Src path= "${project.dir}"/>
+    </target>
+    <target name="update" depends="processCode, pullCode,-taskdef" >
+        <Update path= "${build.dir}"/>
+    </target>
+    <target name="package" depends ="update">
+        <Package path= "${build.dir}"/>
+    </target>
+    <!-- 	
+    <target name="updateProject" depends="checkOut, jarTask" >
+        <exec executable="${aapt}" taskName="crunch">
+            <arg value="crunch" />
+            <arg value="-v" />
+            <arg value="-S" />
+            <arg path="${resource.absolute.dir}" />
+            <arg value="-C" />
+            <arg path="${out.res.absolute.dir}" />
+        </exec>
+    </target> 
+    -->
 </project>
