@@ -1,5 +1,6 @@
 package cn.mimail.ant;
 
+import java.awt.Label;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -18,6 +19,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
+import org.apache.tools.ant.taskdefs.Exit;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -189,6 +191,7 @@ public class UpdateTask extends Task {
                 boolean isSet = false;
                 if (channelName != null) {
                     NodeList childNodes = application.getChildNodes();
+                    ExitReadDom:
                     for (int i = 0; i < childNodes.getLength(); i++) {
                         Node node = childNodes.item(i);
                         if ("meta-data".equals(node.getNodeName())) {
@@ -205,11 +208,10 @@ public class UpdateTask extends Task {
                                     Node item = attr.item(j);
                                     if ("android:value".equals(item.getNodeName())) {
                                         item.setNodeValue(channelName);
-                                        break;
+                                        break ExitReadDom;
                                     }
                                 }
                             }
-                            break;
                         }
                     }
                     if (!isSet) {
