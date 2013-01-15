@@ -33,12 +33,13 @@ public class UpdateTaskTest extends TestCase {
      * Test of UpdateProject method, of class UpdateTask.
      */
     public void testUpdateProject_File_String() {
-//        System.out.println("UpdateProject");
-//        File dir = new File("G:\\Ant\\Build\\YiTest");
-//        String channelName = "GooglePlay";
-//        UpdateTask instance = new UpdateTask();
-//        boolean expResult = true;
-//        boolean result = UpdateTask.UpdateProject(dir, channelName, channelName)
+        System.out.println("UpdateProject");
+        File dir = new File("G:\\android-channel-package\\Build\\HuYing");
+        String channelName = "WanDouJi1";
+        UpdateTask instance = new UpdateTask();
+        boolean expResult = true;
+        String result = UpdateTask.UpdateProject(dir,"D:\\Android\\android-sdk-windows\\tools\\android.bat", channelName);
+        System.out.println(result);
 //        assertEquals(expResult, result);
     }
 }
