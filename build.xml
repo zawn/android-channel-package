@@ -25,6 +25,12 @@
             <file file="${taskProject.jar}"/>
         </resourceexists>
     </condition>
+	
+	<condition property="build.exist">
+        <resourceexists>
+            <file file="${build.dir}"/>
+        </resourceexists>
+    </condition>
     <!--
     (Targets beginning with '-' are not intended to be called on their own.)
 
@@ -91,31 +97,21 @@
         </taskdef>
     </target>
     <target name="pullCode" depends="-taskdef" description="从SVN上检出代码">
-        <!--        
-        <echo level="info">运行自定义的Task</echo>
-        <echo level="info">${taskProject.jar}</echo>
-        -->
         <Svn message= "zhangzhenli">zhangyajun</Svn>
     </target>
-    <target name="processCode" depends="pullCode,-taskdef" description="将代码复制到build.dir并处理代码">
-        <Src path= "${project.dir}"/>
+	<target name="-cleanCode" if="build.exists">
+		<delete dir="${build.dir}"/>
+	</target>
+    <target name="copyCode" depends="-cleanCode,pullCode,-taskdef" description="将代码复制到build.dir并处理代码">
+		<mkdir dir="${build.dir}"/>
+		<copy todir="${build.dir}">		
+			<fileset dir="${project.dir}"/>
+		</copy>
     </target>
-    <target name="update" depends="processCode, pullCode,-taskdef" >
+    <target name="update" depends="copyCode, pullCode,-taskdef" >
         <Update path= "${build.dir}"/>
     </target>
     <target name="package" depends ="update">
         <Package path= "${build.dir}"/>
     </target>
-    <!-- 	
-    <target name="updateProject" depends="checkOut, jarTask" >
-        <exec executable="${aapt}" taskName="crunch">
-            <arg value="crunch" />
-            <arg value="-v" />
-            <arg value="-S" />
-            <arg path="${resource.absolute.dir}" />
-            <arg value="-C" />
-            <arg path="${out.res.absolute.dir}" />
-        </exec>
-    </target> 
-    -->
 </project>
