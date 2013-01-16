@@ -127,6 +127,12 @@ public class SvnKitUtil {
          * SVNWCUtil is a utility class that creates a default options driver.
          */
         DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(svnConfigDir, true);
+        
+        /*
+         * 不存数认证数据
+         */
+        options.setAuthStorageEnabled(false);
+        
         /*
          * Creates an instance of SVNClientManager providing authentication
          * information (name, password) and an options driver
