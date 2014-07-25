@@ -30,7 +30,7 @@
         <echo level="warning">---------------------------------------------------------------------------------------------</echo>
         <echo level="info"></echo>
         <echo level="info">${tools.jar}</echo>
-        <taskdef name="SVN" classname="cn.mimail.ant.SvnTask" classpath="${tools.jar}"/>
+        <taskdef name="SVN" classname="com.appunity.ant.SvnTask" classpath="${tools.jar}"/>
         <SVN message= "zhangzhenli">zhangyajun</SVN>
         <echo level="warning"></echo>
         <echo level="warning">---------------------------------------------------------------------------------------------</echo>

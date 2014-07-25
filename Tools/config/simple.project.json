@@ -1,0 +1,43 @@
+{
+  "project": {
+    "main": {
+      "name": "365TaoFang",
+      "svn": {
+        "url": "svn://192.168.108.41/apn/HouseCoreLib",
+        "username": "zhangzhenli",
+        "password": "zhangzhenli",
+        "version": 1445
+      }
+    },
+    "libs": [
+      {
+        "name": "Lib1",
+        "git": {
+          "clone": "https://github.com/zawn/android-common.git",
+          "path": "/",
+          "username": "zhangzhenli",
+          "password": "zhangzhenli",
+          "branch": "1445",
+          "options": ""
+        }
+      },
+      {
+        "name": "Lib2",
+        "disk": {
+          "url": "E:/android-channel-package/Project/365taofang"
+        }
+      },
+      {
+        "name": "Lib3",
+        "hg": {
+          "clone": "https://code.google.com/p/google-http-java-client/",
+          "path": "/google-http-client-gson",
+          "username": "zhangzhenli",
+          "password": "zhangzhenli",
+          "branch": "分支",
+          "options": ""
+        }
+      }
+    ]
+  }
+}
