@@ -2,8 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package cn.mimail.ant;
+package com.appunity.ant;
 
+import com.appunity.ant.PackageTask;
 import java.util.ArrayList;
 import junit.framework.TestCase;
 
