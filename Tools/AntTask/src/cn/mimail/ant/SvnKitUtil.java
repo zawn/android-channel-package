@@ -90,7 +90,7 @@ public class SvnKitUtil {
         local = new File(properties.getProperty(PROPERTY_PATH), properties.getProperty(PROPERTY_LOCAL, "../../CheckOut"));
         svnConfigDir = new File(properties.getProperty(PROPERTY_PATH), properties.getProperty(PROPERTY_CONFIG));
         try {
-            System.out.println(svnConfigDir.getCanonicalPath());
+            System.out.println("svnConfigDir:"+svnConfigDir.getCanonicalPath());
         } catch (IOException ex) {
             Logger.getLogger(SvnKitUtil.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -101,15 +101,15 @@ public class SvnKitUtil {
             svnConfigDir.mkdirs();
         }
         try {
-            System.out.println("svnName    :" + svnName);
-            System.out.println("svnPassword:" + svnPassword);
+            System.out.println("svnName     :" + svnName);
+            System.out.println("svnPassword :" + svnPassword);
             for (int i = 0; i < svnURLs.length; i++) {
                 SVNURL svnurl = svnURLs[i];
-                System.out.println("svnUrls[" + i + "] :" + svnurl);
+                System.out.println("svnUrls[" + i + "]  :" + svnurl);
 
             }
-            System.out.println("localPath  :" + local.getCanonicalPath());
-            System.out.println("configDir  :" + svnConfigDir.getCanonicalPath());
+            System.out.println("localPath   :" + local.getCanonicalPath());
+            System.out.println("configDir   :" + svnConfigDir.getCanonicalPath());
         } catch (IOException ex) {
             throw ex;
         }

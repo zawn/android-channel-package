@@ -13,31 +13,39 @@ import org.apache.tools.ant.types.LogLevel;
  * @author Zawn
  */
 public class SvnTask extends Task {
-
+    
+    public static final String TAG = "SvnTask ";
+    
     Properties svnProperties;
     String message;
     String text;
     private File baseDir;
-
+    private String relativePath;
+    
     public void addText(String t) {
         text = t;
     }
-
+    
     public void setMessage(String msg) {
         message = msg;
     }
-
+    
     @Override
     public void execute() {
         svnProperties = new Properties();
         baseDir = getProject().getBaseDir();
-        File localFile = new File(getProject().getProperty("svn.local"));
-        File configFile = new File(getProject().getProperty("svn.config"));
+        String mSubversionLocal = getProject().getProperty("svn.local");
+        String mSubversionConfig = getProject().getProperty("svn.config");
+        mSubversionLocal = obtainValidPath(mSubversionLocal);
+        mSubversionConfig = obtainValidPath(mSubversionConfig);
+        System.out.println("baseDir     :" + baseDir.getAbsolutePath());
+        File localDir = new File(mSubversionLocal);
+        File configFile = new File(mSubversionConfig);
         svnProperties.setProperty("svn.username", getProject().getProperty("svn.username"));
         svnProperties.setProperty("svn.password", getProject().getProperty("svn.password"));
         svnProperties.setProperty("svn.url", getProject().getProperty("svn.url"));
         try {
-            svnProperties.setProperty("svn.local", localFile.getCanonicalPath());
+            svnProperties.setProperty("svn.local", localDir.getCanonicalPath());
         } catch (IOException ex) {
             throw new BuildException("The svn.properties svn.local parameter configuration is invalid");
         }
@@ -47,12 +55,11 @@ public class SvnTask extends Task {
             throw new BuildException("The svn.properties svn.config parameter configuration is invalid");
         }
         try {
-
+            
             syncProjectCode(svnProperties);
         } catch (IOException ex) {
             log(ex, LogLevel.ERR.getLevel());
         }
-        System.out.println(getProject().getBaseDir());
         if (message == null) {
             throw new BuildException("No message set.");
         }
@@ -83,5 +90,22 @@ public class SvnTask extends Task {
      * 更新代码版本
      */
     public void updateProjectCode() {
+    }
+    
+    private String obtainValidPath(String path) {
+        File tempFile = new File(path);
+        try {
+            if (relativePath == null) {
+                relativePath = new File("").getCanonicalPath();
+            }
+            boolean contains = tempFile.getCanonicalPath().contains(relativePath);
+            if (contains || path.startsWith(".")) {
+                tempFile = new File(baseDir, path);
+            }
+            return tempFile.getCanonicalPath();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return path;
     }
 }
