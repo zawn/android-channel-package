@@ -12,7 +12,9 @@
     <import file="nbproject/build-impl.xml"/>
     <property name="tools.jar" value="dist/AntTask.jar"/>
     <property name="svn.config.dir" value="../config/svn.properties" />
-    
+    <property name="tools.config" value="../config" />
+    <property file="${tools.config}/svn.properties" />
+    <property file="${tools.config}/local.properties" />
     <condition property="taskJar.exist">
         <resourceexists>
             <file file="${tools.jar}"/>
@@ -22,11 +24,17 @@
         <echo level="info">The Custom Task Jar package does not exist.Recompile...</echo>
         <antcall target="jar"/>
     </target>
-    <target name="mydefault" depends="jarTask" description="Use the Task">
-        <echo level="info">运行自定义的Task</echo>
+    <target name="-post-jar">
+        <echo level="warning">---------------------------------------------------------------------------------------------</echo>
+        <echo level="warning">----华丽的分割线</echo>
+        <echo level="warning">---------------------------------------------------------------------------------------------</echo>
+        <echo level="info"></echo>
         <echo level="info">${tools.jar}</echo>
-        <taskdef name="SVN" classname="cn.mimail.ant.AntTask" classpath="${tools.jar}"/>
+        <taskdef name="SVN" classname="cn.mimail.ant.SvnTask" classpath="${tools.jar}"/>
         <SVN message= "zhangzhenli">zhangyajun</SVN>
+        <echo level="warning"></echo>
+        <echo level="warning">---------------------------------------------------------------------------------------------</echo>
+        <echo level="warning">---------------------------------------------------------------------------------------------</echo>
     </target>
     <target name="updateProjects" >
         <taskdef resource="anttasks.properties" classpathref="${tools.jar}" />
@@ -94,7 +102,7 @@
 
     -->
     <target name="-post-jarsss" description="Use the Task">
-         <echo level="info">运行自定义的Task</echo>
+        <echo level="info">运行自定义的Task</echo>
         <echo level="info">${tools.jar}</echo>
         <taskdef name="SrcTask" classname="cn.mimail.ant.SrcTask" classpath="${tools.jar}"/>
         <SrcTask path= "G:\快盘\SyncFiles\Ant\Project"/>
