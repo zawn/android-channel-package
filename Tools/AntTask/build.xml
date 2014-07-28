@@ -30,8 +30,8 @@
         <echo level="warning">---------------------------------------------------------------------------------------------</echo>
         <echo level="info"></echo>
         <echo level="info">${tools.jar}</echo>
-        <taskdef name="SVN" classname="com.appunity.ant.SvnTask" classpath="${tools.jar}"/>
-        <SVN message= "zhangzhenli">zhangyajun</SVN>
+        <taskdef name="InitProject" classname="com.appunity.ant.InitProjectTask" classpath="${tools.jar}"/>
+        <InitProject profile="E:/android-channel-package/Tools/config/project.json"/>
         <echo level="warning"></echo>
         <echo level="warning">---------------------------------------------------------------------------------------------</echo>
         <echo level="warning">---------------------------------------------------------------------------------------------</echo>
