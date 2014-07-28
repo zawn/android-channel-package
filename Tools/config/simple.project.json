@@ -13,7 +13,7 @@
       {
         "name": "Lib1",
         "git": {
-          "clone": "https://github.com/zawn/android-common.git",
+          "url": "https://github.com/zawn/android-common.git",
           "path": "/",
           "username": "zhangzhenli",
           "password": "zhangzhenli",
@@ -30,7 +30,7 @@
       {
         "name": "Lib3",
         "hg": {
-          "clone": "https://code.google.com/p/google-http-java-client/",
+          "url": "https://code.google.com/p/google-http-java-client/",
           "path": "/google-http-client-gson",
           "username": "zhangzhenli",
           "password": "zhangzhenli",
