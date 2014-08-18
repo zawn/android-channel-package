@@ -162,10 +162,10 @@ public class PackageTask extends Task {
         }
         if (pram != null && !"".equals(pram)) {
             System.out.println("清理项目");
-            Cmd.exec(pram + "clean");
+            Cmd.exec(pram + " clean");
             System.out.println(pram);
 
-            Cmd.exec(pram + "release");
+            Cmd.exec(pram + " release");
             if (channelName != null && !"".equals(pram)) {
                 clearBuildDir(dir, distName);
             }
