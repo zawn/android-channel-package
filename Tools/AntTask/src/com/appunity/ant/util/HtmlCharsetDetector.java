@@ -33,17 +33,17 @@ import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
 import org.mozilla.intl.chardet.nsPSMDetector;
 
 public class HtmlCharsetDetector {
-    
+
     public static boolean found = false;
-    
+
     public static void main(String argv[]) throws Exception {
         argv = new String[]{"http://www.google.com.tw/"};
-        System.out.println(argv.length+"jjjjjjjjjjjjjjjjjjjj");
+        System.out.println(argv.length + "jjjjjjjjjjjjjjjjjjjj");
         if (argv.length != 1 && argv.length != 2) {
-            
+
             System.out.println(
                     "Usage: HtmlCharsetDetector <url> [<languageHint>]");
-            
+
             System.out.println("");
             System.out.println("Where <url> is http://...");
             System.out.println("For optional <languageHint>. Use following...");
@@ -53,7 +53,7 @@ public class HtmlCharsetDetector {
             System.out.println("		4 => Traditional Chinese");
             System.out.println("		5 => Korean");
             System.out.println("		6 => Dont know (default)");
-            
+
             return;
         }
 
@@ -70,20 +70,19 @@ public class HtmlCharsetDetector {
                 System.out.println("CHARSET = " + charset);
             }
         });
-        
-        
+
         URL url = new URL(argv[0]);
         BufferedInputStream imp = new BufferedInputStream(url.openStream());
-        
+
         getEncoding(imp, det);
     }
 
-    private static void getEncoding(InputStream imp, nsDetector det) throws IOException {
+    public static void getEncoding(InputStream imp, nsDetector det) throws IOException {
         byte[] buf = new byte[1024];
         int len;
         boolean done = false;
         boolean isAscii = true;
-        
+
         while ((len = imp.read(buf, 0, buf.length)) != -1) {
 
             // Check if the stream is only ascii.
@@ -97,12 +96,12 @@ public class HtmlCharsetDetector {
             }
         }
         det.DataEnd();
-        
+
         if (isAscii) {
             System.out.println("CHARSET = ASCII");
             found = true;
         }
-        
+
         if (!found) {
             String prob[] = det.getProbableCharsets();
             for (int i = 0; i < prob.length; i++) {

@@ -78,7 +78,7 @@ public class PackageTask extends Task {
                 }
                 if (channelIDs.size() > 0) {
                     System.out.println(Arrays.toString(channelIDs.toArray()));
-                }else{
+                } else {
                     System.out.println("Did not read to any channel name.");
                 }
 
@@ -154,15 +154,18 @@ public class PackageTask extends Task {
                 pramBuilder.append("ant").append(" ");
                 pramBuilder.append("-buildfile").append(" ");
                 pramBuilder.append(buildXml.getCanonicalPath()).append(" ");
-                pramBuilder.append("release");
+//                pramBuilder.append("release");
                 pram = pramBuilder.toString();
                 pram = pram.trim();
             }
         } catch (Exception ex) {
         }
         if (pram != null && !"".equals(pram)) {
+            System.out.println("清理项目");
+            Cmd.exec(pram + "clean");
             System.out.println(pram);
-            Cmd.exec(pram);
+
+            Cmd.exec(pram + "release");
             if (channelName != null && !"".equals(pram)) {
                 clearBuildDir(dir, distName);
             }

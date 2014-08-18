@@ -31,7 +31,9 @@
         <echo level="info"></echo>
         <echo level="info">${tools.jar}</echo>
         <taskdef name="InitProject" classname="com.appunity.ant.InitProjectTask" classpath="${tools.jar}"/>
-        <InitProject profile="E:/android-channel-package/Tools/config/project.json"/>
+        <taskdef name="UpdateReference" classname="com.appunity.ant.UpdateReferenceTask" classpath="${tools.jar}"/>
+        <UpdateReference profile="E:/android-channel-package/Tools/config/project.json" workdir="E:/android-channel-package/Build" timeDir="false"/>
+<!--        <InitProject profile="E:/android-channel-package/Tools/config/project.json" workdir="E:/android-channel-package/workdir" timeDir="false"/>-->
         <echo level="warning"></echo>
         <echo level="warning">---------------------------------------------------------------------------------------------</echo>
         <echo level="warning">---------------------------------------------------------------------------------------------</echo>

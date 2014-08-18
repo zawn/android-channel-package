@@ -33,6 +33,9 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
@@ -72,17 +75,18 @@ public class InitProjectTask extends Task {
         System.out.println("load profile :" + profilePath);
         baseDir = getProject().getBaseDir();
         System.out.println("baseDir     :" + baseDir.getAbsolutePath());
-        workDir = getWorkDir();
+        workDir = getWorkDir(baseDir, workdir, isUserTimeWorkDir);
         try {
             System.out.println("work dir     :" + workDir.getCanonicalPath());
         } catch (IOException ex) {
         }
-        try {
-            System.out.println(IOUtils.toString(new FileInputStream(profilePath), "UTF-8"));
-        } catch (IOException ex) {
-            Logger.getLogger(InitProjectTask.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        ProjectProfile profile = getProfile();
+//        try {
+//            System.out.println(IOUtils.toString(new FileInputStream(profilePath), "UTF-8"));
+//        } catch (IOException ex) {
+//            Logger.getLogger(InitProjectTask.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+        ProjectProfile profile = getProfile(profilePath);
+        System.out.println(profile);
         try {
             getSource(profile.main);
             for (ProjectProfile.Project libProject : profile.libs) {
@@ -93,8 +97,8 @@ public class InitProjectTask extends Task {
         }
     }
 
-    private File getWorkDir() throws UnsupportedOperationException {
-        File dir = new File(obtainValidPath(workdir));
+    protected static File getWorkDir(File baseDir, String workdir, boolean isUserTimeWorkDir) throws UnsupportedOperationException {
+        File dir = new File(obtainValidPath(baseDir, workdir));
         if (!dir.exists()) {
             System.out.println("make dir     :" + workdir);
             dir.mkdirs();
@@ -143,7 +147,7 @@ public class InitProjectTask extends Task {
         }
     }
 
-    private ProjectProfile getProfile() {
+    protected static ProjectProfile getProfile(String profilePath) {
         ProjectProfile profile = null;
         try {
             Gson gson = new Gson();
@@ -152,7 +156,6 @@ public class InitProjectTask extends Task {
             JsonReader jsonReader = new JsonReader(reader);
             JsonObject asJsonObject = parser.parse(jsonReader).getAsJsonObject();
             profile = gson.fromJson(asJsonObject.get("project"), ProjectProfile.class);
-            System.out.println(profile);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(InitProjectTask.class.getName()).log(Level.SEVERE, null, ex);
         } catch (UnsupportedEncodingException ex) {
@@ -197,10 +200,10 @@ public class InitProjectTask extends Task {
         }
     };
 
-    private String relativePath;
+    private static String relativePath;
     private File baseDir;
 
-    private String obtainValidPath(String path) {
+    protected static String obtainValidPath(File baseDir, String path) {
         File tempFile = new File(path);
         try {
             if (relativePath == null) {
@@ -212,7 +215,6 @@ public class InitProjectTask extends Task {
             }
             return tempFile.getCanonicalPath();
         } catch (Exception e) {
-            e.printStackTrace();
         }
         return path;
     }

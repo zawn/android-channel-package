@@ -106,7 +106,6 @@ public class SubversionHelper {
             }
             return tempFile.getCanonicalPath();
         } catch (Exception e) {
-            e.printStackTrace();
         }
         return path;
     }
