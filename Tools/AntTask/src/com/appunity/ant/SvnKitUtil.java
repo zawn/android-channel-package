@@ -3,8 +3,6 @@ package com.appunity.ant;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNErrorCode;
 import org.tmatesoft.svn.core.SVNException;
@@ -31,6 +29,7 @@ public class SvnKitUtil {
     public static final String PROPERTY_LOCAL = "svn.local";
     public static final String PROPERTY_CONFIG = "svn.config";
     public static final String PROPERTY_PATH = "svn.path";
+    public static final String PROPERTY_LOCAL_NAME = "svn.dirname";
     private static SVNClientManager svnManager;
     private static ISVNEventHandler commitEventHandler;
     private static ISVNEventHandler updateEventHandler;
@@ -39,8 +38,9 @@ public class SvnKitUtil {
     private static String svnPassword;
     private static boolean isInit = false;
     public static File svnConfigDir;
-    public static SVNURL[] svnURLs;
+    public static SVNURL svnURLs;
     public static File local;
+    public static String local_name;
 
     public static boolean isInit() {
         return isInit;
@@ -67,9 +67,6 @@ public class SvnKitUtil {
     }
 
     public static void init(Properties properties) throws IOException {
-        if (isInit) {
-            return;
-        }
         System.out.println("The initialization SVN components...");
         if (properties == null) {
             throw new NullPointerException("If you need to check out the code from SVN above, you must configuration svn.properties files in a certain directory ! ");
@@ -78,22 +75,13 @@ public class SvnKitUtil {
         svnPassword = properties.getProperty(PROPERTY_PASSWORD, "anonymous");
         String svnUrlString = properties.getProperty(PROPERTY_URL);
         try {
-            String[] s;
-            s = svnUrlString.split("\\*");
-            svnURLs = new SVNURL[s.length];
-            for (int i = 0; i < s.length; i++) {
-                svnURLs[i] = SVNURL.parseURIEncoded(s[i]);
-            }
+            svnURLs = SVNURL.parseURIEncoded(svnUrlString);
         } catch (SVNException e) {
             throw new NullPointerException("If you need to check out the code from SVN above, you must configure the svn url svn.properties file");
         }
         local = new File(properties.getProperty(PROPERTY_PATH), properties.getProperty(PROPERTY_LOCAL, "../../CheckOut"));
+        local_name = properties.getProperty(PROPERTY_LOCAL_NAME, (new File(svnURLs.getPath())).getName());
         svnConfigDir = new File(properties.getProperty(PROPERTY_PATH), properties.getProperty(PROPERTY_CONFIG));
-        try {
-            System.out.println("svnConfigDir:"+svnConfigDir.getCanonicalPath());
-        } catch (IOException ex) {
-            Logger.getLogger(SvnKitUtil.class.getName()).log(Level.SEVERE, null, ex);
-        }
         if (svnConfigDir.exists() && !svnConfigDir.isDirectory()) {
             svnConfigDir.delete();
         }
@@ -103,12 +91,8 @@ public class SvnKitUtil {
         try {
             System.out.println("svnName     :" + svnName);
             System.out.println("svnPassword :" + svnPassword);
-            for (int i = 0; i < svnURLs.length; i++) {
-                SVNURL svnurl = svnURLs[i];
-                System.out.println("svnUrls[" + i + "]  :" + svnurl);
-
-            }
-            System.out.println("localPath   :" + local.getCanonicalPath());
+            System.out.println("svnUrl      :" + svnURLs);
+            System.out.println("localPath   :" + local.getCanonicalPath() + File.separator + local_name);
             System.out.println("configDir   :" + svnConfigDir.getCanonicalPath());
         } catch (IOException ex) {
             throw ex;
@@ -127,12 +111,12 @@ public class SvnKitUtil {
          * SVNWCUtil is a utility class that creates a default options driver.
          */
         DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(svnConfigDir, true);
-        
+
         /*
          * 不存数认证数据
          */
         options.setAuthStorageEnabled(false);
-        
+
         /*
          * Creates an instance of SVNClientManager providing authentication
          * information (name, password) and an options driver
@@ -186,33 +170,30 @@ public class SvnKitUtil {
         }
         String dirString;
         File dir;
-        for (int i = 0; i < svnURLs.length; i++) {
-            SVNURL svnURL = svnURLs[i];
-            dirString = (new File(svnURL.getPath())).getName();
-            System.out.println("Checking out a working copy(" + (i + 1) + "/" + svnURLs.length + ") \n  from: " + svnURL);
-            dir = new File(local, dirString);
-            dirCheck(dir);
-            System.out.println("    to: " + dir.getCanonicalPath());
-            try {
-                /*
-                 * recursively checks out a working copy from url into wcDir.
-                 * SVNRevision.HEAD means the latest revision to be checked out.
-                 */
-                checkout(svnURL, SVNRevision.HEAD, dir, true);
-            } catch (SVNException svne) {
-                if (svne.getErrorMessage().getErrorCode().equals(SVNErrorCode.WC_LOCKED)) {
-                    try {
-                        System.out.println(svne.getErrorMessage().getErrorCode().toString());
-                        cleanup(dir);
-                        checkout(svnURL, SVNRevision.HEAD, dir, true);
-                    } catch (SVNException ex) {
-                        error("error while checking out a working copy for the location '"
-                                + svnURL + "'", svne);
-                    }
-                } else {
+        SVNURL svnURL = svnURLs;
+        System.out.println("Checking out a working copy \n  from: " + svnURL);
+        dir = new File(local, local_name);
+        dirCheck(dir);
+        System.out.println("    to: " + dir.getCanonicalPath());
+        try {
+            /*
+             * recursively checks out a working copy from url into wcDir.
+             * SVNRevision.HEAD means the latest revision to be checked out.
+             */
+            checkout(svnURL, SVNRevision.HEAD, dir, true);
+        } catch (SVNException svne) {
+            if (svne.getErrorMessage().getErrorCode().equals(SVNErrorCode.WC_LOCKED)) {
+                try {
+                    System.out.println(svne.getErrorMessage().getErrorCode().toString());
+                    cleanup(dir);
+                    checkout(svnURL, SVNRevision.HEAD, dir, true);
+                } catch (SVNException ex) {
                     error("error while checking out a working copy for the location '"
                             + svnURL + "'", svne);
                 }
+            } else {
+                error("error while checking out a working copy for the location '"
+                        + svnURL + "'", svne);
             }
         }
         return true;
