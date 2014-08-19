@@ -56,9 +56,11 @@ public class PackageTask extends Task {
         buildDir = new File(path);
         channelIDsProFile = getProject().getProperty("ChannelIDs");
         List<String> channelIDs = new ArrayList<String>();
+        System.out.println("ssssssss" + channelIDsProFile);
         if (channelIDsProFile != null) {
+            System.out.println("fdssssssss" + channelIDsProFile);
             try {
-                File f = new File(baseDir, channelIDsProFile);
+                File f = new File( Utils.obtainValidPath(this, channelIDsProFile, "ChannelIDs"));
                 System.out.println("Read the channels list file: " + f.getCanonicalPath());
                 if (f.exists()) {
                     BufferedReader bufferedReader = new BufferedReader(new FileReader(f));
