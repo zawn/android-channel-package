@@ -24,7 +24,7 @@
         <echo level="info">The Custom Task Jar package does not exist.Recompile...</echo>
         <antcall target="jar"/>
     </target>
-    <target name="-post-jar">
+    <target name="-post-jarddd">
         <echo level="warning">---------------------------------------------------------------------------------------------</echo>
         <echo level="warning">----华丽的分割线</echo>
         <echo level="warning">---------------------------------------------------------------------------------------------</echo>
