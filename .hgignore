@@ -3,3 +3,6 @@ Project/*
 Build/*
 Tools/AntTask/build/*
 Tools/AntTask/dist/*
+build/*
+src/*
+dist/*
