@@ -85,6 +85,7 @@ public class InitProjectTask extends Task {
 //        } catch (IOException ex) {
 //            Logger.getLogger(InitProjectTask.class.getName()).log(Level.SEVERE, null, ex);
 //        }
+        profilePath = obtainValidPath(baseDir, profilePath);
         ProjectProfile profile = getProfile(profilePath);
         System.out.println(profile);
         try {

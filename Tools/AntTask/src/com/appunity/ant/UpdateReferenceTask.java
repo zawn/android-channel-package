@@ -72,6 +72,7 @@ public class UpdateReferenceTask extends Task {
             System.out.println("work dir     :" + workDir.getCanonicalPath());
         } catch (IOException ex) {
         }
+        profilePath = obtainValidPath(baseDir, profilePath);
         ProjectProfile profile = getProfile(profilePath);
         try {
             updateReference(profile);
