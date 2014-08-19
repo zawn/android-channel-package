@@ -1,4 +1,4 @@
 syntax: glob
 Project/*
 Build/*
-Tools/AntTask/build/classes/*
+Tools/AntTask/build/*
