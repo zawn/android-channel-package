@@ -15,9 +15,9 @@
  */
 package com.appunity.ant;
 
+import com.appunity.ant.pojo.ProjectProfile;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -105,11 +105,14 @@ public class PackageTask extends Task {
         File[] listFiles = dir.listFiles();
         List<String> channelIDsPackageList = new ArrayList<String>();
         ArrayList<String> list = new ArrayList<String>();
+        ProjectProfile profile = Utils.getProfile(this, null);
         if (listFiles != null) {
             for (File file : listFiles) {
-                System.out.println("Making the default package...");
-                if (packageProject(file)) {
-                    list.add(file.getAbsolutePath());
+                if (file.getName().equals(profile.main.name)) {
+                    System.out.println("Making the default package...");
+                    if (packageProject(file)) {
+                        list.add(file.getAbsolutePath());
+                    }
                 }
                 System.out.println();
             }
@@ -131,8 +134,9 @@ public class PackageTask extends Task {
             }
             list.addAll(channelIDsPackageList);
             return list;
+        } else {
+            throw new BuildException(Utils.getCurrentWorkDir(this, null).getAbsolutePath() + profile.main.name);
         }
-        return null;
     }
 
     private boolean packageProject(File file) {
@@ -151,21 +155,18 @@ public class PackageTask extends Task {
             File buildXml = new File(dir, "build.xml");
             StringBuilder pramBuilder = new StringBuilder();
             if (distName != null && isLib == 0 && buildXml.exists()) {
-                pramBuilder.append("ant").append(" ");
+                pramBuilder.append(Utils.getAntPath(this)).append(" ");
                 pramBuilder.append("-buildfile").append(" ");
                 pramBuilder.append(buildXml.getCanonicalPath()).append(" ");
-//                pramBuilder.append("release");
+                pramBuilder.append("release");
                 pram = pramBuilder.toString();
                 pram = pram.trim();
             }
         } catch (Exception ex) {
         }
         if (pram != null && !"".equals(pram)) {
-            System.out.println("清理项目");
-            Cmd.exec(pram + " clean");
-            System.out.println(pram);
-
-            Cmd.exec(pram + " release");
+            System.out.println("打包项目");
+            Cmd.exec(pram);
             if (channelName != null && !"".equals(pram)) {
                 clearBuildDir(dir, distName);
             }

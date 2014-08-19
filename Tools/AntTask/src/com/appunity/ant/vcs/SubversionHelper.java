@@ -44,8 +44,16 @@ public class SubversionHelper {
         baseDir = task.getProject().getBaseDir();
         String mSubversionLocal = dir.getAbsolutePath();
         String mSubversionConfig = task.getProject().getProperty("svn.config");
-        mSubversionLocal = obtainValidPath(mSubversionLocal);
-        mSubversionConfig = obtainValidPath(mSubversionConfig);
+        try {
+            mSubversionLocal = obtainValidPath(mSubversionLocal);
+        } catch (Exception e) {
+            throw new BuildException("Working path misconfigured");
+        }
+        try {
+            mSubversionConfig = obtainValidPath(mSubversionConfig);
+        } catch (Exception e) {
+            throw new BuildException("svn.config properties configuration path is wrong");
+        }
         File localDir = new File(mSubversionLocal);
         File configFile = new File(mSubversionConfig);
         svnProperties.setProperty("svn.username", subverison.username);

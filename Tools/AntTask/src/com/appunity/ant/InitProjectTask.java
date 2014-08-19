@@ -17,29 +17,12 @@ package com.appunity.ant;
 
 import com.appunity.ant.pojo.ProjectProfile;
 import com.appunity.ant.vcs.SubversionHelper;
-import com.google.gson.Gson;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.stream.JsonReader;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 
@@ -52,7 +35,7 @@ public class InitProjectTask extends Task {
     String message;
     String text;
     private String profilePath;
-    private String workdir;
+    private String workDirString;
     private File workDir;
     private boolean isUserTimeWorkDir;
 
@@ -67,106 +50,34 @@ public class InitProjectTask extends Task {
     }
 
     public void setWorkdir(String dir) {
-        workdir = dir;
+        workDirString = dir;
     }
 
     @Override
     public void execute() throws BuildException {
-        System.out.println("load profile :" + profilePath);
-        baseDir = getProject().getBaseDir();
-        System.out.println("baseDir     :" + baseDir.getAbsolutePath());
-        workDir = getWorkDir(baseDir, workdir, isUserTimeWorkDir);
+        System.out.println("load profile  :" + profilePath);
+        workDir = Utils.getNewWorkDir(this, workDirString, true);
         try {
-            System.out.println("work dir     :" + workDir.getCanonicalPath());
+            System.out.println("source dir  :" + workDir.getCanonicalPath());
         } catch (IOException ex) {
+            throw new BuildException("source dir error");
         }
-//        try {
-//            System.out.println(IOUtils.toString(new FileInputStream(profilePath), "UTF-8"));
-//        } catch (IOException ex) {
-//            Logger.getLogger(InitProjectTask.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-        profilePath = obtainValidPath(baseDir, profilePath);
-        ProjectProfile profile = getProfile(profilePath);
+        profilePath = Utils.obtainValidPath(this, profilePath, "project.profile");
+        ProjectProfile profile = Utils.getProfile(this, profilePath);
+        if (profile == null) {
+            throw new BuildException("Package configuration json file not found");
+        }
         System.out.println(profile);
         try {
             getSource(profile.main);
-            for (ProjectProfile.Project libProject : profile.libs) {
-                getSource(libProject);
+            if (profile.libs != null) {
+                for (ProjectProfile.Project libProject : profile.libs) {
+                    getSource(libProject);
+                }
             }
         } catch (IOException ex) {
             Logger.getLogger(InitProjectTask.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    protected static File getWorkDir(File baseDir, String workdir, boolean isUserTimeWorkDir) throws UnsupportedOperationException {
-        File dir = new File(obtainValidPath(baseDir, workdir));
-        if (!dir.exists()) {
-            System.out.println("make dir     :" + workdir);
-            dir.mkdirs();
-        } else {
-            if (!dir.isDirectory()) {
-                File oldfile = new File(workdir + ".bak");
-                for (int i = 0; oldfile.exists(); i++) {
-                    oldfile = new File(workdir + "." + i + ".bak");
-                }
-                dir.renameTo(oldfile);
-                System.out.println("make dir     :" + workdir);
-                dir.mkdirs();
-                System.out.println("work dir " + workdir + " is not a dir, will rename old file to " + oldfile.getName());
-            }
-        }
-        if (!dir.canWrite()) {
-            throw new UnsupportedOperationException("工作目录不可写: " + workdir);
-        }
-        if (isUserTimeWorkDir) {
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-            File file = new File(dir, df.format(new Date()));
-            while (file.exists()) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ex) {
-                }
-                file = new File(dir, df.format(new Date()));
-            }
-            file.mkdirs();
-            return file;
-        } else {
-            for (File object : dir.listFiles()) {
-                if (object.isDirectory()) {
-                    try {
-                        FileUtils.deleteDirectory(object);
-                        System.out.println("delete old dir: " + object);
-                    } catch (IOException ex) {
-                        Logger.getLogger(InitProjectTask.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                } else {
-                    object.delete();
-                    System.out.println("delete old file: " + object);
-                }
-            }
-            return dir;
-        }
-    }
-
-    protected static ProjectProfile getProfile(String profilePath) {
-        ProjectProfile profile = null;
-        try {
-            Gson gson = new Gson();
-            JsonParser parser = new JsonParser();
-            InputStreamReader reader = new InputStreamReader(new FileInputStream(profilePath), "UTF-8");
-            JsonReader jsonReader = new JsonReader(reader);
-            JsonObject asJsonObject = parser.parse(jsonReader).getAsJsonObject();
-            profile = gson.fromJson(asJsonObject.get("project"), ProjectProfile.class);
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(InitProjectTask.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(InitProjectTask.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (JsonIOException ex) {
-            Logger.getLogger(InitProjectTask.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (JsonSyntaxException ex) {
-            Logger.getLogger(InitProjectTask.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return profile;
     }
 
     private void getSource(ProjectProfile.Project project) throws IOException {
@@ -200,23 +111,4 @@ public class InitProjectTask extends Task {
             return true;
         }
     };
-
-    private static String relativePath;
-    private File baseDir;
-
-    protected static String obtainValidPath(File baseDir, String path) {
-        File tempFile = new File(path);
-        try {
-            if (relativePath == null) {
-                relativePath = new File("").getCanonicalPath();
-            }
-            boolean contains = tempFile.getCanonicalPath().contains(relativePath);
-            if (contains || path.startsWith(".")) {
-                tempFile = new File(baseDir, path);
-            }
-            return tempFile.getCanonicalPath();
-        } catch (Exception e) {
-        }
-        return path;
-    }
 }

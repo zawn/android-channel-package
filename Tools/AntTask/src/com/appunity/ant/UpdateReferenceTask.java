@@ -15,15 +15,11 @@
  */
 package com.appunity.ant;
 
-import static com.appunity.ant.InitProjectTask.getProfile;
-import static com.appunity.ant.InitProjectTask.obtainValidPath;
 import com.appunity.ant.pojo.ProjectProfile;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +27,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.io.FileUtils;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 
@@ -64,16 +59,12 @@ public class UpdateReferenceTask extends Task {
 
     @Override
     public void execute() throws BuildException {
-        System.out.println("load profile :" + profilePath);
-        baseDir = getProject().getBaseDir();
-        System.out.println("baseDir      :" + baseDir.getAbsolutePath());
-        workDir = getWorkDir(baseDir, workdir, isUserTimeWorkDir, false);
+        workDir = Utils.getCurrentWorkDir(this, workdir);
         try {
             System.out.println("work dir     :" + workDir.getCanonicalPath());
         } catch (IOException ex) {
         }
-        profilePath = obtainValidPath(baseDir, profilePath);
-        ProjectProfile profile = getProfile(profilePath);
+        ProjectProfile profile = Utils.getProfile(this, profilePath);
         try {
             updateReference(profile);
         } catch (IOException ex) {
@@ -86,9 +77,17 @@ public class UpdateReferenceTask extends Task {
      */
     private void updateReference(ProjectProfile profile) throws IOException {
         HashMap<String, String> map = new HashMap<String, String>();
-        for (ProjectProfile.Project libProject : profile.libs) {
-            map.put(libProject.name, ".." + File.separator + libProject.name);
+        if (profile.libs != null) {
+            for (ProjectProfile.Project libProject : profile.libs) {
+                map.put(libProject.name, ".." + File.separator + libProject.name);
+            }
         }
+        System.out.println("原有的依赖项:");
+        getReference(profile.main, map);
+        for (ProjectProfile.Project libProject : profile.libs) {
+            getReference(libProject, map);
+        }
+        System.out.println("更新后依赖项:");
         getReference(profile.main, map);
         for (ProjectProfile.Project libProject : profile.libs) {
             getReference(libProject, map);
@@ -104,9 +103,9 @@ public class UpdateReferenceTask extends Task {
             for (Map.Entry<Object, Object> entry : properties.entrySet()) {
                 String key = entry.getKey().toString();
                 String value = entry.getValue().toString();
-                System.out.println(key + "=" + value);
                 Set<String> keySet = map.keySet();
                 if (key.contains("android.library.reference")) {
+                    System.out.println(key + "=" + value);
                     boolean find = false;
                     for (String string : keySet) {
                         if (value.contains(string)) {
@@ -123,57 +122,4 @@ public class UpdateReferenceTask extends Task {
             properties.store(new FileOutputStream(propertiesFile), new Date().toString());
         }
     }
-
-    protected static File getWorkDir(File baseDir, String workdir, boolean isUserTimeWorkDir, boolean isClear) throws UnsupportedOperationException {
-        File dir = new File(obtainValidPath(baseDir, workdir));
-        if (!dir.exists()) {
-            System.out.println("make dir     :" + workdir);
-            dir.mkdirs();
-        } else {
-            if (!dir.isDirectory()) {
-                File oldfile = new File(workdir + ".bak");
-                for (int i = 0; oldfile.exists(); i++) {
-                    oldfile = new File(workdir + "." + i + ".bak");
-                }
-                dir.renameTo(oldfile);
-                System.out.println("make dir     :" + workdir);
-                dir.mkdirs();
-                System.out.println("work dir " + workdir + " is not a dir, will rename old file to " + oldfile.getName());
-            }
-        }
-        if (!dir.canWrite()) {
-            throw new UnsupportedOperationException("工作目录不可写: " + workdir);
-        }
-        if (isUserTimeWorkDir) {
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-            File file = new File(dir, df.format(new Date()));
-            while (file.exists()) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ex) {
-                }
-                file = new File(dir, df.format(new Date()));
-            }
-            file.mkdirs();
-            return file;
-        } else {
-            if (isClear) {
-                for (File object : dir.listFiles()) {
-                    if (object.isDirectory()) {
-                        try {
-                            FileUtils.deleteDirectory(object);
-                            System.out.println("delete old dir: " + object);
-                        } catch (IOException ex) {
-                            Logger.getLogger(InitProjectTask.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    } else {
-                        object.delete();
-                        System.out.println("delete old file: " + object);
-                    }
-                }
-            }
-            return dir;
-        }
-    }
-
 }
